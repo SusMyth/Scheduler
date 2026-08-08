@@ -45,9 +45,14 @@ const times = [
 
 export default function SchedulerGrid(){
     const [selectedCells, setSelectedCells] = useState<string[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragMode, setDragMode] = useState<"select" | "erase">("select");
 
     return(
-        <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-1">
+        <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-1" 
+        onMouseUp={() => {
+            setIsDragging(false);
+        }}>
         <div></div>
 
         
@@ -71,13 +76,44 @@ export default function SchedulerGrid(){
                     ? "bg-blue-500"
                     : "bg-white hover:bg-gray-100"
                   }`}
-                  onClick={() => {
+                  onClick={(event) => {
+                    if (isDragging) return;
                     const cellId = `${day}-${time}`;
                     setSelectedCells((current) =>
                       current.includes(cellId)
                         ? current.filter((id) => id !== cellId)
                         : [...current, cellId]
                     );
+                  }}
+                  onMouseDown={() => {
+                    const cellId = `${day}-${time}`;
+                    const isSelected = selectedCells.includes(cellId);
+
+                    setIsDragging(true);
+                    setDragMode(
+                        selectedCells.includes(cellId) 
+                            ? "erase"
+                            : "select"
+                    );
+                    setSelectedCells((current)=>{
+                        if (isSelected){
+                            return current.filter((id) => id !== cellId);
+                        }
+                        return [...current,cellId];
+                    })
+                  }}
+                  onMouseEnter={() => {
+                    if (!isDragging) return;
+                    const cellId = `${day}-${time}`;
+                    setSelectedCells((current) => {
+                        if (dragMode === "select") {
+                            if(current.includes(cellId)){
+                                return current;
+                            }
+                            return [...current, cellId];
+                        }
+                        return current.filter((id)=> id !== cellId);
+                    });
                   }}
               />
             ))}
