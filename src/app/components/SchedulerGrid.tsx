@@ -1,5 +1,12 @@
-"use client"
-import {useState} from "react";
+"use client";
+
+import { useState } from "react";
+import { Schedule } from "../types/schedule";
+
+type SchedulerGridProps = {
+  schedule: Schedule | undefined;
+  onCellsChange: (cells: string[]) => void;
+};
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -43,82 +50,101 @@ const times = [
   "00:00",
 ];
 
-export default function SchedulerGrid(){
-    const [selectedCells, setSelectedCells] = useState<string[]>([]);
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragMode, setDragMode] = useState<"select" | "erase">("select");
+export default function SchedulerGrid({
+  schedule,
+  onCellsChange,
+}: SchedulerGridProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragMode, setDragMode] = useState<"select" | "erase">("select");
 
-    return(
-        <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-1" 
-        onMouseUp={() => {
-            setIsDragging(false);
-        }}>
-        <div></div>
+  return (
+    <div
+      className="grid grid-cols-[80px_repeat(7,1fr)] gap-1"
+      onMouseUp={() => {
+        setIsDragging(false);
+      }}
+    >
+      <div></div>
 
-        
-        {days.map((day)=>(
-          <div 
-            key={day}
-            className="p-3 text-center font-semibold">{day}</div>
-        ))}
+      {days.map((day) => (
+        <div
+          key={day}
+          className="p-3 text-center font-semibold"
+        >
+          {day}
+        </div>
+      ))}
 
-        {times.map((time)=>(
-          <div key={time} className="contents">
-            <div className= "border-t p-2 text-sm text-gray-500">
-              {time}
-            </div>
-
-            {days.map((day)=>(
-              <button 
-                key={`${day}-${time}`}
-                className= {`h-10 border border-gray-200 ${
-                  selectedCells.includes(`${day}-${time}`)
-                    ? "bg-blue-500"
-                    : "bg-white hover:bg-gray-100"
-                  }`}
-                  onClick={(event) => {
-                    if (isDragging) return;
-                    const cellId = `${day}-${time}`;
-                    setSelectedCells((current) =>
-                      current.includes(cellId)
-                        ? current.filter((id) => id !== cellId)
-                        : [...current, cellId]
-                    );
-                  }}
-                  onMouseDown={() => {
-                    const cellId = `${day}-${time}`;
-                    const isSelected = selectedCells.includes(cellId);
-
-                    setIsDragging(true);
-                    setDragMode(
-                        selectedCells.includes(cellId) 
-                            ? "erase"
-                            : "select"
-                    );
-                    setSelectedCells((current)=>{
-                        if (isSelected){
-                            return current.filter((id) => id !== cellId);
-                        }
-                        return [...current,cellId];
-                    })
-                  }}
-                  onMouseEnter={() => {
-                    if (!isDragging) return;
-                    const cellId = `${day}-${time}`;
-                    setSelectedCells((current) => {
-                        if (dragMode === "select") {
-                            if(current.includes(cellId)){
-                                return current;
-                            }
-                            return [...current, cellId];
-                        }
-                        return current.filter((id)=> id !== cellId);
-                    });
-                  }}
-              />
-            ))}
+      {times.map((time) => (
+        <div key={time} className="contents">
+          <div className="border-t p-2 text-sm text-gray-500">
+            {time}
           </div>
-        ))}
-      </div>
-    );
+
+          {days.map((day) => {
+            const cellId = `${day}-${time}`;
+            const isSelected = schedule?.cells.includes(cellId) ?? false;
+
+            return (
+              <button
+                key={cellId}
+                className={`h-10 border border-gray-200 ${
+                  isSelected
+                    ? "text-white"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+                style={{
+                  backgroundColor: isSelected
+                    ? schedule?.color
+                    : undefined,
+                }}
+                onMouseDown={() => {
+                  if (!schedule) return;
+
+                  const isAlreadySelected =
+                    schedule.cells.includes(cellId);
+
+                  setIsDragging(true);
+
+                  setDragMode(
+                    isAlreadySelected
+                      ? "erase"
+                      : "select"
+                  );
+
+                  const newCells = isAlreadySelected
+                    ? schedule.cells.filter(
+                        (id) => id !== cellId
+                      )
+                    : [...schedule.cells, cellId];
+
+                  onCellsChange(newCells);
+                }}
+                onMouseEnter={() => {
+                  if (!isDragging || !schedule) return;
+
+                  if (dragMode === "select") {
+                    if (schedule.cells.includes(cellId)) {
+                      return;
+                    }
+
+                    onCellsChange([
+                      ...schedule.cells,
+                      cellId,
+                    ]);
+                  } else {
+                    onCellsChange(
+                      schedule.cells.filter(
+                        (id) => id !== cellId
+                      )
+                    );
+                  }
+                }}
+              />
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
 }
