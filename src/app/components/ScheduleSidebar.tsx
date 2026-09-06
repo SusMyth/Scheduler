@@ -5,6 +5,7 @@ type ScheduleSidebarProps = {
   activeScheduleId: string;
   onSelectedSchedule: (id: string) => void;
   onCreateSchedule: () => void;
+  onToggleVisibility: (id: string) => void;
 };
 
 export default function ScheduleSidebar({
@@ -12,6 +13,7 @@ export default function ScheduleSidebar({
   activeScheduleId,
   onSelectedSchedule,
   onCreateSchedule,
+  onToggleVisibility,
 }: ScheduleSidebarProps) {
   return (
     <aside className="w-64 border-r pr-6">
@@ -30,6 +32,12 @@ export default function ScheduleSidebar({
                     : "hover:bg-gray-50"
             }`}
           >
+            <input
+              type="checkbox"
+              checked={schedule.visible}
+              onChange={() => onToggleVisibility(schedule.id)}
+              onClick = {(event) => event.stopPropagation()}
+            />
             <div
               className="h-3 w-3 rounded-full"
               style={{ backgroundColor: schedule.color }}

@@ -12,12 +12,14 @@ const initialSchedules: Schedule[] = [
     name: "Classes",
     color: "green",
     cells: [],
+    visible: true,
   },
   {
     id: "gym",
     name: "Gym",
     color: "yellow",
     cells: [],
+    visible: true
   },
 ];
 
@@ -53,7 +55,8 @@ export default function Home() {
       id: crypto.randomUUID(),
       name,
       color,
-      cells: []
+      cells: [],
+      visible: true,
     };
 
     setSchedules((currentSchedules) => [
@@ -63,6 +66,14 @@ export default function Home() {
 
     setActiveScheduleId(newSchedule.id);
     setIsCreatingSchedule(false);
+  };
+
+  const toggleScheduleVisibility = (scheduleId: string) => {
+    setSchedules((currentSchedules) =>
+      currentSchedules.map((schedule) =>
+        schedule.id === scheduleId ? { ...schedule, visible: !schedule.visible } : schedule
+      )
+    );
   };
 
   return (
@@ -77,6 +88,7 @@ export default function Home() {
           activeScheduleId={activeScheduleId}
           onSelectedSchedule={setActiveScheduleId}
           onCreateSchedule={() => setIsCreatingSchedule(true)}
+          onToggleVisibility = {toggleScheduleVisibility}
         />
 
         <div className="flex-1">

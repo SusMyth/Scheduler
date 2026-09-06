@@ -3,4 +3,5 @@ export type Schedule = {
     name: string;
     color: string;
     cells: string[];
+    visible: boolean;
 };
