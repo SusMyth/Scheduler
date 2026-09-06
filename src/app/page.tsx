@@ -4,6 +4,7 @@ import { useState } from "react";
 import SchedulerGrid from "./components/SchedulerGrid";
 import ScheduleSidebar from "./components/ScheduleSidebar";
 import { Schedule } from "./types/schedule";
+import CreateScheduleModal from "./components/CreateScheduleModal";
 
 const initialSchedules: Schedule[] = [
   {
@@ -27,9 +28,12 @@ export default function Home() {
   const [activeScheduleId, setActiveScheduleId] =
     useState<string>("classes");
 
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false); 
+
   const activeSchedule = schedules.find(
     (schedule) => schedule.id === activeScheduleId
   );
+   
 
   const updateScheduleCells = (
     scheduleId: string,
@@ -44,6 +48,23 @@ export default function Home() {
     );
   };
 
+  const createSchedule = (name: string, color: string) => {
+    const newSchedule: Schedule = {
+      id: crypto.randomUUID(),
+      name,
+      color,
+      cells: []
+    };
+
+    setSchedules((currentSchedules) => [
+      ...currentSchedules,
+      newSchedule,
+    ]);
+
+    setActiveScheduleId(newSchedule.id);
+    setIsCreatingSchedule(false);
+  };
+
   return (
     <main className="p-8">
       <h1 className="mb-8 text-3xl font-bold">
@@ -55,6 +76,7 @@ export default function Home() {
           schedules={schedules}
           activeScheduleId={activeScheduleId}
           onSelectedSchedule={setActiveScheduleId}
+          onCreateSchedule={() => setIsCreatingSchedule(true)}
         />
 
         <div className="flex-1">
@@ -71,6 +93,13 @@ export default function Home() {
           />
         </div>
       </div>
+
+      {isCreatingSchedule && (
+        <CreateScheduleModal
+        onCreate = {createSchedule}
+        onClose={() => setIsCreatingSchedule(false)}
+        />
+      )}
     </main>
   );
 }

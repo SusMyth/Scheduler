@@ -4,12 +4,14 @@ type ScheduleSidebarProps = {
   schedules: Schedule[];
   activeScheduleId: string;
   onSelectedSchedule: (id: string) => void;
+  onCreateSchedule: () => void;
 };
 
 export default function ScheduleSidebar({
   schedules,
   activeScheduleId,
-  onSelectedSchedule
+  onSelectedSchedule,
+  onCreateSchedule,
 }: ScheduleSidebarProps) {
   return (
     <aside className="w-64 border-r pr-6">
@@ -38,7 +40,10 @@ export default function ScheduleSidebar({
         ))}
       </div>
 
-      <button className="mt-6 w-full rounded-lg border border-dashed p-2 text-sm hover:bg-gray-50">
+      <button
+        onClick={onCreateSchedule}
+        className="mt-6 w-full rounded-lg border border-dashed p-2 text-sm hover:bg-gray-50"
+      >
         + New Schedule
       </button>
     </aside>
